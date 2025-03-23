@@ -1,12 +1,25 @@
-import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Button, FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput } from "@mui/material";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
+import Visibility from "@mui/icons-material/Visibility"
+import VisibilityOff from "@mui/icons-material/VisibilityOff"
+import Box from "@mui/material/Box"
+import Button from "@mui/material/Button"
+import FormControl from "@mui/material/FormControl"
+import IconButton from "@mui/material/IconButton"
+import InputAdornment from "@mui/material/InputAdornment"
+import InputLabel from "@mui/material/InputLabel"
+import OutlinedInput from "@mui/material/OutlinedInput"
+import TextField from "@mui/material/TextField"
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
    const [showPassword, setShowPassword] = useState(false)
+   const [loginFormState, setLoginFormState] = useState({ username: '', password: '' })
+   const navigate = useNavigate()
    
+   const handleSubmitLogin = () => {
+      console.log(loginFormState)
+   }
+
    return (
       <div style={{ 
          display: 'flex', 
@@ -23,24 +36,27 @@ export default function Login() {
             flexDirection: 'column',
             backgroundColor: 'white',
             rowGap: '15px',
+            width: '300px',
          }}>
             <h2>Login</h2>
             <TextField 
                id="username" 
                label="Username" 
                variant="outlined" 
+               value={loginFormState.username}
+               onChange={(e) => setLoginFormState({ ...loginFormState, username: e.target.value })}
             />
-            <FormControl sx={{ width: '25ch' }} variant="outlined">
-               <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+            <FormControl sx={{ }} variant="outlined">
+               <InputLabel htmlFor="password">Password</InputLabel>
                <OutlinedInput
-                  id="outlined-adornment-password"
+                  id="password"
                   type={showPassword ? 'text' : 'password'}
+                  value={loginFormState.password}
+                  onChange={(e) => setLoginFormState({ ...loginFormState, password: e.target.value })}
                   endAdornment={
                   <InputAdornment position="end">
                      <IconButton
-                        aria-label={
-                           showPassword ? 'hide the password' : 'display the password'
-                        }
+                        aria-label={ showPassword ? 'hide the password' : 'display the password' }
                         onClick={() => setShowPassword((show) => !show)}
                         edge="end"
                      >
@@ -51,8 +67,16 @@ export default function Login() {
                   label="Password"
                />
             </FormControl>
-            <Button variant="contained" sx={{ backgroundColor: "#692f6b" }}>Login</Button>
-            <Button variant="outlined" sx={{ color: "#692f6b", borderColor: "#692f6b" }}>Sign Up</Button>
+            <Button 
+               variant="contained" 
+               sx={{ backgroundColor: "#692f6b" }}
+               onClick={handleSubmitLogin}
+            >Log In</Button>
+            <Button 
+               variant="outlined" 
+               sx={{ color: "#692f6b", borderColor: "#692f6b" }}
+               onClick={() => navigate('/signUp')}
+            >Sign Up</Button>
          </Box>
       </div>
    )
