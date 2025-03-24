@@ -22,11 +22,12 @@ export interface Column {
 
 type Row = InventoryRow
 
-export default function Table({ columns, rows, title }: 
+export default function Table({ columns, rows, title, handleEditClick }: 
    { 
       columns: Column[],
       rows: Row[], 
-      title: string 
+      title: string,
+      handleEditClick: (row: Row) => void 
    }) {
    const [page, setPage] = useState(0)
    const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -76,7 +77,7 @@ export default function Table({ columns, rows, title }:
                                     <span style={{ 
                                        display: hoveredRowID === row.id ? 'block' : 'none'
                                     }}>
-                                       <IconButton aria-label='edit' size='small'>
+                                       <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
                                           <EditIcon fontSize='small' />
                                        </IconButton>
                                        <IconButton aria-label='delete' size='small'>
