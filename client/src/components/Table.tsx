@@ -9,6 +9,9 @@ import TableCell from '@mui/material/TableCell'
 import TableBody from '@mui/material/TableBody'
 import TablePagination from '@mui/material/TablePagination'
 import { InventoryRow } from '../pages/InventoryTable'
+import EditIcon from '@mui/icons-material/Edit';
+import IconButton from '@mui/material/IconButton'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 export interface Column {
    id: string
@@ -26,7 +29,8 @@ export default function Table({ columns, rows, title }:
       title: string 
    }) {
    const [page, setPage] = useState(0)
-   const [rowsPerPage, setRowsPerPage] = useState(10)
+   const [rowsPerPage, setRowsPerPage] = useState<number>(10)
+   const [hoveredRowID, setHoveredRowID] = useState<number | null>(null)
  
    const handleChangePage = (event: unknown, newPage: number) => {
      setPage(newPage)
@@ -36,53 +40,75 @@ export default function Table({ columns, rows, title }:
      setRowsPerPage(+event.target.value)
      setPage(0)
    }
- 
+
    return (
-     <Paper sx={{ width: '850px', minWidth: '550px', overflow: 'auto' }}>
-       <TableContainer sx={{ maxHeight: 440 }}>
-         <MuiTable stickyHeader aria-label={title}>
-           <TableHead>
-             <TableRow>
-               {columns.map((column) => (
-                 <TableCell
-                   key={column.id}
-                   align={column.align}
-                   style={{ minWidth: column.minWidth }}
-                 >
-                   {column.label}
-                 </TableCell>
-               ))}
-             </TableRow>
-           </TableHead>
-           <TableBody>
-             {rows
-               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-               .map((row) => {
-                 return (
-                   <TableRow hover tabIndex={-1} key={row.id}>
-                     {columns.map((column) => {
-                       const value = row[column.id as keyof Row]
-                       return (
-                         <TableCell key={column.id} align={column.align}>
-                           {value}
-                         </TableCell>
-                       )
-                     })}
-                   </TableRow>
-                 )
-               })}
-           </TableBody>
-         </MuiTable>
-       </TableContainer>
-       <TablePagination
-         rowsPerPageOptions={[10, 25, 100]}
-         component="div"
-         count={rows.length}
-         rowsPerPage={rowsPerPage}
-         page={page}
-         onPageChange={handleChangePage}
-         onRowsPerPageChange={handleChangeRowsPerPage}
-       />
-     </Paper>
+     <>
+      <Paper sx={{ width: '90%', minWidth: '550px', marginY: '10px' }}>
+         <h2 style={{ padding: '0 16px' }}>{title}</h2>
+      </Paper>
+
+      <Paper sx={{ width: '90%', minWidth: '550px' }}>
+         <TableContainer sx={{ maxHeight: 440 }}>
+            <MuiTable stickyHeader aria-label={title}>
+            <TableHead>
+               <TableRow>
+                  {columns.map((column) => (
+                  <TableCell
+                     key={column.id}
+                     align={column.align}
+                     style={{ minWidth: column.minWidth }}
+                  >
+                     {column.label}
+                  </TableCell>
+                  ))}
+               </TableRow>
+            </TableHead>
+            <TableBody>
+               {rows
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row) => {
+                  return (
+                     <TableRow hover tabIndex={-1} key={row.id} onMouseEnter={() => setHoveredRowID(row.id)} onMouseLeave={() => setHoveredRowID(null)}>
+                        {columns.map((column) => {
+                           if (column.id === 'actions') {
+                              return (
+                                 <TableCell key={column.id} align={column.align} sx={{ padding: '0px 16px' }}>
+                                    <span style={{ 
+                                       display: hoveredRowID === row.id ? 'block' : 'none'
+                                    }}>
+                                       <IconButton aria-label='edit' size='small'>
+                                          <EditIcon fontSize='small' />
+                                       </IconButton>
+                                       <IconButton aria-label='delete' size='small'>
+                                          <DeleteForeverIcon fontSize='small' />
+                                       </IconButton>
+                                    </span>
+                                 </TableCell>
+                              )
+                           } else {
+                              return (
+                                 <TableCell key={column.id} align={column.align}>
+                                    {row[column.id as keyof Row]}
+                                 </TableCell>
+                              )
+                           }
+                        })}
+                     </TableRow>
+                  )
+                  })}
+            </TableBody>
+            </MuiTable>
+         </TableContainer>
+         <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={rows.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+         />
+      </Paper>
+     </>
    )
 }

@@ -35,13 +35,13 @@ export default function InventoryTable() {
       {
         id: 'description',
         label: 'Description',
-        minWidth: 125,
+        minWidth: 100,
         align: 'left',
       },
       {
         id: 'actions',
         label: 'Actions',
-        minWidth: 75,
+        minWidth: 100,
         align: 'center',
       },
    ]
@@ -62,10 +62,9 @@ export default function InventoryTable() {
    return (
       <div style={{ 
          display: 'flex', 
-         justifyContent: 'center', 
+         flexDirection: 'column',
          alignItems: 'center', 
-         height: '90vh', 
-         width: '90vw' }}>
+      }}>
          <Table columns={columns} rows={rows} title='Inventory Table' />
       </div>
    )
