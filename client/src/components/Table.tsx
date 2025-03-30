@@ -9,10 +9,19 @@ import TableCell from '@mui/material/TableCell'
 import TableBody from '@mui/material/TableBody'
 import TablePagination from '@mui/material/TablePagination'
 import { InventoryRow } from '../pages/InventoryTable'
-import EditIcon from '@mui/icons-material/Edit';
+import EditIcon from '@mui/icons-material/Edit'
 import IconButton from '@mui/material/IconButton'
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
+import SortIcon from '@mui/icons-material/Sort'
+import Tooltip from '@mui/material/Tooltip'
+import Popper from '@mui/material/Popper'
+import Select, { SelectChangeEvent } from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import Button from '@mui/material/Button'
 export interface Column {
    id: string
    label: string
@@ -32,6 +41,11 @@ export default function Table({ columns, rows, title, handleEditClick }:
    const [page, setPage] = useState(0)
    const [rowsPerPage, setRowsPerPage] = useState<number>(10)
    const [hoveredRowID, setHoveredRowID] = useState<number | null>(null)
+   const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null)
+   const [sortOptions, setSortOptions] = useState<any>({ sortColumn: columns[0].id, sortOrder: 'asc', algorithm: 'merge' })
+
+   const algorithmOptions = ['bubble', 'merge', 'quick']
+   const sortPopperOpen = Boolean(sortAnchorEl);
  
    const handleChangePage = (event: unknown, newPage: number) => {
      setPage(newPage)
@@ -44,11 +58,64 @@ export default function Table({ columns, rows, title, handleEditClick }:
 
    return (
      <>
-      <Paper sx={{ width: '90%', minWidth: '550px', marginY: '10px' }}>
+      <Paper sx={{ width: '90%', minWidth: '550px', marginY: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
          <h2 style={{ padding: '0 16px' }}>{title}</h2>
+         <div style={{ padding: '0 16px' }}>
+            <Tooltip title='Sorting options'>
+               <IconButton onClick={(e) => setSortAnchorEl(sortAnchorEl ? null : e.currentTarget)}>
+                  <SortIcon />
+               </IconButton>
+            </Tooltip>
+         </div>
       </Paper>
+      
+      <Popper open={sortPopperOpen} anchorEl={sortAnchorEl} placement='bottom' style={{ zIndex: 100 }}>
+         <Paper sx={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px', width: '200px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
+               <FormControl fullWidth sx={{ }}>
+                  <InputLabel id="sort-by-label">Sort Column</InputLabel>
+                  <Select
+                     labelId="sort-by-label"
+                     id="sort-by"
+                     value={sortOptions.sortColumn}
+                     label="Sort Column"
+                     onChange={(e: SelectChangeEvent) => setSortOptions({ ...sortOptions, sortColumn: e.target.value })}
+                  >
+                     {columns.map((column) => (
+                        <MenuItem key={column.id} value={column.id}>{column.label}</MenuItem>
+                     ))}
+                  </Select>
+               </FormControl>
+               <FormControl fullWidth sx={{ }}>
+                  <InputLabel id="sort-algo-label">Algorithm</InputLabel>
+                  <Select
+                     labelId="sort-algo-label"
+                     id="sort-algo"
+                     value={sortOptions.algorithm}
+                     label="Algorithm"
+                     onChange={(e: SelectChangeEvent) => setSortOptions({ ...sortOptions, algorithm: e.target.value })}
+                  >
+                     {algorithmOptions.map((algo) => (
+                        <MenuItem key={algo} value={algo}>{algo}</MenuItem>
+                     ))}
+                  </Select>
+               </FormControl>
+               <ToggleButtonGroup
+                  color="primary"
+                  value={sortOptions.sortOrder}
+                  exclusive
+                  onChange={(e: React.MouseEvent<HTMLElement>, value: string) => setSortOptions({ ...sortOptions, sortOrder: value })}
+                  aria-label="sort order"
+               >
+                  <ToggleButton value="asc">Asc</ToggleButton>
+                  <ToggleButton value="desc">Desc</ToggleButton>
+               </ToggleButtonGroup>
+               <Button variant='contained'>Sort</Button>
+            </div>
+         </Paper>
+      </Popper>
 
-      <Paper sx={{ width: '90%', minWidth: '550px' }}>
+      <Paper sx={{ width: '90%', minWidth: '550px', overflow: 'hidden' }}>
          <TableContainer sx={{ maxHeight: 440 }}>
             <MuiTable stickyHeader aria-label={title}>
             <TableHead>
