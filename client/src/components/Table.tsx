@@ -22,6 +22,7 @@ import FormControl from '@mui/material/FormControl'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Button from '@mui/material/Button'
+import mergeSort from '../utils/mergeSort'
 export interface Column {
    id: string
    label: string
@@ -47,6 +48,10 @@ export default function Table({ columns, rows, title, handleEditClick }:
    const algorithmOptions = ['bubble', 'merge', 'quick']
    const sortPopperOpen = Boolean(sortAnchorEl);
  
+   console.log('pre-sort', rows)
+   rows = mergeSort(rows, 'count')
+   console.log('post-sort', rows)
+
    const handleChangePage = (event: unknown, newPage: number) => {
      setPage(newPage)
    }
