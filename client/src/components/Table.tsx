@@ -49,7 +49,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
    const sortPopperOpen = Boolean(sortAnchorEl);
  
    console.log('pre-sort', rows)
-   rows = mergeSort(rows, 'count')
+   rows = mergeSort(rows, 'count', 'desc')
    console.log('post-sort', rows)
 
    const handleChangePage = (event: unknown, newPage: number) => {
