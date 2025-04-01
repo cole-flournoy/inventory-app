@@ -5,10 +5,6 @@ import Box from '@mui/material/Box'
 import TextField from "@mui/material/TextField"
 import Button from "@mui/material/Button"
 
-interface InventoryColumn extends Column {
-   id: 'id' | 'name' | 'count' | 'description' | 'actions'
- }
-
  export interface InventoryRow {
    id: number
    name: string
@@ -20,7 +16,7 @@ export default function InventoryTable() {
    const [editingRow, setEditingRow] = useState<InventoryRow>() 
    const [editFormState, setEditFormState] = useState<InventoryRow>({} as InventoryRow)
 
-   const columns: InventoryColumn[] = [
+   const columns: Column[] = [
       { 
          id: 'id', 
          label: 'ID', 
@@ -44,12 +40,6 @@ export default function InventoryTable() {
         label: 'Description',
         minWidth: 100,
         align: 'left',
-      },
-      {
-        id: 'actions',
-        label: 'Actions',
-        minWidth: 100,
-        align: 'center',
       },
    ]
 

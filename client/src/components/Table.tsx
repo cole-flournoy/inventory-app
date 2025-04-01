@@ -30,9 +30,30 @@ export interface Column {
    label: string
    minWidth?: number
    align?: 'right' | 'center' | 'left'
- }
-
+}
 type Row = InventoryRow
+interface SortOptions {
+   sortColumn: keyof Row
+   algorithm: 'bubble' | 'merge' | 'quick'
+   sortOrder: 'asc' | 'desc'
+}
+
+const sortRows = (rows: Row[], sortOptions: SortOptions) => {
+   switch (sortOptions.algorithm) {
+      case 'bubble':
+         rows = bubbleSort(rows, sortOptions.sortColumn, sortOptions.sortOrder)
+         break
+      case 'merge':
+         rows = mergeSort(rows, sortOptions.sortColumn, sortOptions.sortOrder)
+         break
+      case 'quick':
+         rows = quickSort(rows, sortOptions.sortColumn, sortOptions.sortOrder)
+         break
+      default:
+         break
+   }
+   return rows
+}
 
 export default function Table({ columns, rows, title, handleEditClick }: 
    { 
@@ -45,16 +66,15 @@ export default function Table({ columns, rows, title, handleEditClick }:
    const [rowsPerPage, setRowsPerPage] = useState<number>(10)
    const [hoveredRowID, setHoveredRowID] = useState<number | null>(null)
    const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null)
-   const [sortOptions, setSortOptions] = useState<any>({ sortColumn: columns[0].id, sortOrder: 'asc', algorithm: 'merge' })
+   const [sortOptions, setSortOptions] = useState<SortOptions>({sortColumn: columns[0].id as keyof Row, algorithm: 'merge', sortOrder: 'asc'})
+   const [sortedRows, setSortedRows] = useState<Row[]>(sortRows(rows, sortOptions))
 
-   const algorithmOptions = ['bubble', 'merge', 'quick']
+   const algorithmOptions = [
+      {id: 'bubble', display: 'Bubble sort'}, 
+      {id: 'merge', display: 'Merge sort'}, 
+      {id: 'quick', display: 'Quick sort'}
+   ]
    const sortPopperOpen = Boolean(sortAnchorEl);
- 
-   console.log('pre-sort', rows)
-   // rows = mergeSort(rows, 'count', 'desc')
-   // rows = bubbleSort(rows, 'description', 'asc')
-   rows = quickSort(rows, 'name', 'desc')
-   console.log('post-sort', rows)
 
    const handleChangePage = (event: unknown, newPage: number) => {
      setPage(newPage)
@@ -88,7 +108,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
                      id="sort-by"
                      value={sortOptions.sortColumn}
                      label="Sort Column"
-                     onChange={(e: SelectChangeEvent) => setSortOptions({ ...sortOptions, sortColumn: e.target.value })}
+                     onChange={(e: SelectChangeEvent) => setSortOptions({ ...sortOptions, sortColumn: e.target.value as SortOptions['sortColumn'] })}
                   >
                      {columns.map((column) => (
                         <MenuItem key={column.id} value={column.id}>{column.label}</MenuItem>
@@ -102,10 +122,10 @@ export default function Table({ columns, rows, title, handleEditClick }:
                      id="sort-algo"
                      value={sortOptions.algorithm}
                      label="Algorithm"
-                     onChange={(e: SelectChangeEvent) => setSortOptions({ ...sortOptions, algorithm: e.target.value })}
+                     onChange={(e: SelectChangeEvent) => setSortOptions({ ...sortOptions, algorithm: e.target.value as SortOptions['algorithm'] })}
                   >
                      {algorithmOptions.map((algo) => (
-                        <MenuItem key={algo} value={algo}>{algo}</MenuItem>
+                        <MenuItem key={algo.id} value={algo.id}>{algo.display}</MenuItem>
                      ))}
                   </Select>
                </FormControl>
@@ -113,13 +133,19 @@ export default function Table({ columns, rows, title, handleEditClick }:
                   color="primary"
                   value={sortOptions.sortOrder}
                   exclusive
-                  onChange={(e: React.MouseEvent<HTMLElement>, value: string) => setSortOptions({ ...sortOptions, sortOrder: value })}
+                  onChange={(e: React.MouseEvent<HTMLElement>, value: string) => setSortOptions({ ...sortOptions, sortOrder: value as SortOptions['sortOrder'] })}
                   aria-label="sort order"
                >
                   <ToggleButton value="asc">Asc</ToggleButton>
                   <ToggleButton value="desc">Desc</ToggleButton>
                </ToggleButtonGroup>
-               <Button variant='contained'>Sort</Button>
+               <Button 
+                  variant='contained' 
+                  onClick={() => {
+                     setSortedRows(sortRows(rows, sortOptions))
+                     setSortAnchorEl(null)
+                  }}
+                  >Sort</Button>
             </div>
          </Paper>
       </Popper>
@@ -130,46 +156,42 @@ export default function Table({ columns, rows, title, handleEditClick }:
             <TableHead>
                <TableRow>
                   {columns.map((column) => (
-                  <TableCell
-                     key={column.id}
-                     align={column.align}
-                     style={{ minWidth: column.minWidth }}
-                  >
-                     {column.label}
-                  </TableCell>
+                     <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth }}
+                     >
+                        {column.label}
+                     </TableCell>
                   ))}
+                  <TableCell key='actions' align='center' style={{ minWidth: 100 }}></TableCell>
                </TableRow>
             </TableHead>
             <TableBody>
-               {rows
+               {sortedRows
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                   return (
                      <TableRow hover tabIndex={-1} key={row.id} onMouseEnter={() => setHoveredRowID(row.id)} onMouseLeave={() => setHoveredRowID(null)}>
                         {columns.map((column) => {
-                           if (column.id === 'actions') {
-                              return (
-                                 <TableCell key={column.id} align={column.align} sx={{ padding: '0px 16px' }}>
-                                    <span style={{ 
-                                       display: hoveredRowID === row.id ? 'block' : 'none'
-                                    }}>
-                                       <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
-                                          <EditIcon fontSize='small' />
-                                       </IconButton>
-                                       <IconButton aria-label='delete' size='small'>
-                                          <DeleteForeverIcon fontSize='small' />
-                                       </IconButton>
-                                    </span>
-                                 </TableCell>
-                              )
-                           } else {
-                              return (
-                                 <TableCell key={column.id} align={column.align}>
-                                    {row[column.id as keyof Row]}
-                                 </TableCell>
-                              )
-                           }
+                           return (
+                              <TableCell key={column.id} align={column.align}>
+                                 {row[column.id as keyof Row]}
+                              </TableCell>
+                           )
                         })}
+                        <TableCell key='actions' align='center' sx={{ padding: '0px 16px' }}>
+                           <span style={{ 
+                              display: hoveredRowID === row.id ? 'block' : 'none'
+                           }}>
+                              <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
+                                 <EditIcon fontSize='small' />
+                              </IconButton>
+                              <IconButton aria-label='delete' size='small'>
+                                 <DeleteForeverIcon fontSize='small' />
+                              </IconButton>
+                           </span>
+                        </TableCell>
                      </TableRow>
                   )
                   })}
