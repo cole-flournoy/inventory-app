@@ -111,7 +111,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
       <Paper sx={{ width: '90%', minWidth: '550px', marginY: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
          <h2 style={{ padding: '0 16px' }}>{title}</h2>
          <div style={{ padding: '0 16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(105, 47, 107, .2)', borderRadius: '20px', padding: '5px 20px 5px 10px' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(85, 107, 47, .2)', borderRadius: '20px', padding: '5px 20px 5px 10px' }}>
                <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
                <TextField 
                   id='search' 
