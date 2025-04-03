@@ -96,7 +96,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
          return sortedRows.filter((row) => {
             return Object.values(row).some((value) => {
                if (typeof value === 'string') {
-                  return value.toLowerCase().includes(searchInput.toLowerCase())
+                  return value.toLowerCase().includes(searchInput)
                } else if (typeof value === 'number') {
                   return value.toString().includes(searchInput)
                }
@@ -119,7 +119,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
                   variant='standard' 
                   value={searchInput} 
                   onChange={(e) => {
-                     setSearchInput(e.target.value)
+                     setSearchInput(e.target.value.toLowerCase())
                   }} 
                   sx={{ marginTop: 0 }}/>
             </Box>
