@@ -25,6 +25,9 @@ import Button from '@mui/material/Button'
 import mergeSort from '../utils/mergeSort'
 import bubbleSort from '../utils/bubbleSort'
 import quickSort from '../utils/quickSort'
+import Box from '@mui/material/Box'
+import SearchIcon from '@mui/icons-material/Search';
+import TextField from '@mui/material/TextField'
 export interface Column {
    id: string
    label: string
@@ -68,6 +71,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
    const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null)
    const [sortOptions, setSortOptions] = useState<SortOptions>({sortColumn: columns[0].id as keyof Row, algorithm: 'merge', sortOrder: 'asc'})
    const [sortedRows, setSortedRows] = useState<Row[]>(sortRows(rows, sortOptions))
+   const [searchInput, setSearchInput] = useState<string>('')
 
    const algorithmOptions = [
       {id: 'bubble', display: 'Bubble sort'}, 
@@ -85,11 +89,40 @@ export default function Table({ columns, rows, title, handleEditClick }:
      setPage(0)
    }
 
+   const getDisplayRows = () => {
+      if (searchInput === '') {
+         return sortedRows
+      } else {
+         return sortedRows.filter((row) => {
+            return Object.values(row).some((value) => {
+               if (typeof value === 'string') {
+                  return value.toLowerCase().includes(searchInput.toLowerCase())
+               } else if (typeof value === 'number') {
+                  return value.toString().includes(searchInput)
+               }
+               return false
+            })
+         })
+      }
+   }
+
    return (
      <>
       <Paper sx={{ width: '90%', minWidth: '550px', marginY: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
          <h2 style={{ padding: '0 16px' }}>{title}</h2>
-         <div style={{ padding: '0 16px' }}>
+         <div style={{ padding: '0 16px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(105, 47, 107, .2)', borderRadius: '20px', padding: '5px 20px 5px 10px' }}>
+               <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} />
+               <TextField 
+                  id='search' 
+                  placeholder='Search' 
+                  variant='standard' 
+                  value={searchInput} 
+                  onChange={(e) => {
+                     setSearchInput(e.target.value)
+                  }} 
+                  sx={{ marginTop: 0 }}/>
+            </Box>
             <Tooltip title='Sorting options'>
                <IconButton onClick={(e) => setSortAnchorEl(sortAnchorEl ? null : e.currentTarget)}>
                   <SortIcon />
@@ -142,7 +175,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
                <Button 
                   variant='contained' 
                   onClick={() => {
-                     setSortedRows(sortRows(rows, sortOptions))
+                     setSortedRows((prevRows) => sortRows(prevRows, sortOptions))
                      setSortAnchorEl(null)
                   }}
                   >Sort</Button>
@@ -168,7 +201,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
                </TableRow>
             </TableHead>
             <TableBody>
-               {sortedRows
+               {getDisplayRows()
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => {
                   return (
