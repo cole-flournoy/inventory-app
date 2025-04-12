@@ -5,7 +5,7 @@ export interface User extends Document {
   companyId: Types.ObjectId;
   name: string;
   role: 'ADMIN' | 'USER';
-  email: string;
+  username: string;
   password: string;
   comparePassword: (password: string) => Promise<boolean>;
 }
@@ -23,9 +23,9 @@ const UserSchema = new Schema<User>({
   role: {
     type: String,
     enum: ['ADMIN', 'USER'],
-    default: 'USER',
+    required: true,
   },
-  email: {
+  username: {
     type: String,
     required: true,
     unique: true,
