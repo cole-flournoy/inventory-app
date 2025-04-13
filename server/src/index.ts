@@ -5,7 +5,9 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const authRoute = require('./routes/AuthRoute');
+const authRoutes = require('./routes/AuthRoutes');
+const inventoryRoutes = require('./routes/InventoryRoutes');
+
 const app = express();
 const cors = require('cors');
 const corsOptions = {
@@ -25,13 +27,5 @@ app.listen(8080, () => {
   console.log('Server is running on port 8080');
 });
 
-app.use('/api/', authRoute)
-
-
-// app.get('/', (req: Request, res: Response) => {
-//   res.send('Hello World');
-// });
-
-// app.post('/api/signup', async (req: Request, res: Response) => {
-  
-// });
+app.use('/api/', authRoutes);
+app.use('/api/inventory', inventoryRoutes);

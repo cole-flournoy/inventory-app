@@ -1,10 +1,10 @@
 import { Login, Signup } from "../controllers/AuthController";
 import { Router } from "express";
-import { userAuthentication } from "../utils/auth";
+import { returnAuthenticatedUser } from "../utils/auth";
 
 const router = Router();
 
-router.post('/verify', userAuthentication)
+router.post('/verify', returnAuthenticatedUser)
 router.post('/signup', Signup);
 router.post('/login', Login);
 

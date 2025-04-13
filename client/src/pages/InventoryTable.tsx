@@ -8,21 +8,28 @@ import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-hot-toast"
+import Fab from '@mui/material/Fab';
+import AddIcon from '@mui/icons-material/Add';
 
  export interface InventoryRow {
-   id: number
+   SKU: string
    name: string
+   companyId: string
    count: number
    description: string | null
  }
 
 export default function InventoryTable() {
    const [editingRow, setEditingRow] = useState<InventoryRow>() 
-   const [editFormState, setEditFormState] = useState<InventoryRow>({} as InventoryRow)
+   const [modalFormState, setModalFormState] = useState<InventoryRow>({} as InventoryRow)
+   const [rows, setRows] = useState<InventoryRow[]>([])
+   const [addingInventory, setAddingInventory] = useState(false)
+   const [loggedInUser, setLoggedInUser] = useState<any>({})
 
    const navigate = useNavigate()
    const [cookies, removeCookie] = useCookies(['token'])
    
+
    const verifyCookie = async () => {
       if (!cookies.token) {
         navigate('/login')
@@ -36,9 +43,7 @@ export default function InventoryTable() {
          )
          
          const { user } = data
-         toast.success(`Hello ${user.name}! You are an ${user.role} user`, {
-            duration: 5000,
-         })
+         setLoggedInUser(user)
       } catch {
          toast.error('Session expired. Please login again.', {
             duration: 5000,
@@ -48,9 +53,31 @@ export default function InventoryTable() {
       }
    }
 
-    useEffect(() => {
+   useEffect(() => {
       verifyCookie()
-    }, [cookies, navigate, removeCookie])
+   }, [cookies, navigate, removeCookie])
+
+   const fetchInventoryData = async () => {
+      try {
+         const { data } = await axios.get(
+            'http://localhost:8080/api/inventory',
+            { withCredentials: true }
+         )
+         setRows(data.map((item: any) => ({
+            SKU: item.SKU,
+            name: item.name,
+            companyId: item.companyId,
+            count: item.count,
+            description: item.description,
+         })))
+      } catch (error) {
+         toast.error('Error fetching inventory data')
+      }
+   }
+
+   useEffect(() => {
+      fetchInventoryData()
+   }, [])
    
    const handleLogout = () => {
       removeCookie('token', '')
@@ -59,8 +86,8 @@ export default function InventoryTable() {
 
    const columns: Column[] = [
       { 
-         id: 'id', 
-         label: 'ID', 
+         id: 'SKU', 
+         label: 'SKU', 
          minWidth: 50,
          align: 'center',
       },
@@ -83,22 +110,62 @@ export default function InventoryTable() {
         align: 'left',
       },
    ]
-
-   const rows: InventoryRow[] = [
-      { id: 1, name: 'Apples', count: 35, description: 'Fuji' },
-      { id: 2, name: 'Oranges', count: 42, description: 'Navel - Florida' },
-      { id: 3, name: 'Bananas', count: 45, description: null },
-      { id: 4, name: 'Carrots', count: 16, description: 'Regular' },
-      { id: 5, name: 'Kale', count: 12, description: 'Lacinato - Organic' },
-      { id: 6, name: 'Apples', count: 150, description: 'Granny Smith' },
-      { id: 7, name: 'Apples', count: 44, description: 'Fuji - Organic' },
-      { id: 8, name: 'Kiwis', count: 36, description: null },
-      { id: 9, name: 'Carrots', count: 65, description: 'Organic' }
-   ]
-      
-   const handleEditRow = (row: InventoryRow) => {
+    
+   const handleEditInventory = (row: InventoryRow) => {
       setEditingRow(row)
-      setEditFormState(row)
+      setModalFormState(row)
+   }
+
+   const handleAddInventory = () => {
+      setAddingInventory(true)
+   }
+
+   const handleSubmitModal = async () => {
+      if (!modalFormState.SKU || !modalFormState.name || !modalFormState.count) {
+         toast.error('SKU, name, and count are required')
+         return
+      }
+
+      modalFormState.companyId = loggedInUser.companyId
+
+      if (addingInventory){
+         try {
+            const response = await axios.post(
+               'http://localhost:8080/api/inventory',
+               modalFormState,
+               { withCredentials: true }
+            )
+   
+            if (response.status === 201 || response.status === 200) {
+               toast.success('New inventory item added')
+               fetchInventoryData()
+            } else {
+               toast.error('Error adding inventory item')
+            }
+         } catch (error) {
+            toast.error('Error adding inventory item')
+         } 
+      } else {
+         try {
+            const response = await axios.patch(
+               `http://localhost:8080/api/inventory/${editingRow?.SKU}`,
+               modalFormState,
+               { withCredentials: true }
+            )
+   
+            if (response.status === 201 || response.status === 200) {
+               toast.success('Inventory item updated')
+               fetchInventoryData()
+            } else {
+               toast.error('Error updating inventory item')
+            }
+         } catch (error) {
+            toast.error('Error updating inventory item')
+         }
+      }
+      
+      setEditingRow(undefined)
+      setAddingInventory(false)
    }
 
    return (
@@ -108,11 +175,14 @@ export default function InventoryTable() {
             flexDirection: 'column',
             alignItems: 'center', 
          }}>
-            <Table columns={columns} rows={rows} title='Inventory Table' handleEditClick={handleEditRow}/>
+            <Table columns={columns} rows={rows} title='Inventory Table' handleEditClick={handleEditInventory}/>
          </div>
          <Modal
-            open={editingRow !== undefined}
-            onClose={() => setEditingRow({} as InventoryRow)}
+            open={!!editingRow || addingInventory}
+            onClose={() => {
+               setEditingRow(undefined)
+               setAddingInventory(false)
+            }}
          >
             <Box sx={{
                  position: 'absolute',
@@ -127,41 +197,69 @@ export default function InventoryTable() {
                  flexDirection: 'column',
                  rowGap: '15px',
             }}>
-               <h2 style={{ margin: '10px 5px' }}>Edit Inventory Item</h2>
+               <h2 style={{ margin: '10px 5px' }}>{(addingInventory ? 'Add' : 'Edit') + ' Inventory Item'}</h2>
+               <TextField
+                  id="SKU"
+                  label="SKU"
+                  variant="outlined"
+                  value={editingRow?.SKU}
+                  onChange={(e) => setModalFormState({ ...modalFormState, SKU: e.target.value })} 
+               />
                <TextField
                   id="name"
                   label="Name"
                   variant="outlined"
                   value={editingRow?.name}
-                  onChange={(e) => setEditFormState({ ...editFormState, name: e.target.value })} 
+                  onChange={(e) => setModalFormState({ ...modalFormState, name: e.target.value })} 
                />
                <TextField
                   id="count"
                   label="Count"
                   variant="outlined"
                   value={editingRow?.count}
-                  onChange={(e) => setEditFormState({ ...editFormState, count: +e.target.value })}
+                  onChange={(e) => setModalFormState({ ...modalFormState, count: +e.target.value })}
                />
                <TextField
                   id="description"
                   label="Description"
                   variant="outlined"
                   value={editingRow?.description}
-                  onChange={(e) => setEditFormState({ ...editFormState, description: e.target.value })}
+                  onChange={(e) => setModalFormState({ ...modalFormState, description: e.target.value })}
                />  
                <span style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                  <Button variant="outlined" sx={{ color: '#692f6b', borderColor: '#692f6b' }} onClick={() => setEditingRow(undefined)}>
+                  <Button 
+                     variant="outlined" 
+                     sx={{ color: '#692f6b', borderColor: '#692f6b' }} 
+                     onClick={() => () => {
+                        setEditingRow(undefined)
+                        setAddingInventory(false)
+                     }}
+                  >
                      Cancel
                   </Button>
-                  <Button variant="contained" sx={{ backgroundColor: '#692f6b' }} onClick={() => {
-                     console.log(editFormState)
-                     setEditingRow(undefined)
-                  }}>
+                  <Button 
+                     variant="contained" 
+                     sx={{ backgroundColor: '#692f6b' }} 
+                     onClick={() => handleSubmitModal()}
+                  >
                      Save
                   </Button>
                </span>
             </Box>   
          </Modal>
+         <Fab 
+            sx={{ 
+               backgroundColor: '#692f6b', 
+               color: '#fff', 
+               position: 'fixed', 
+               bottom: 20, 
+               right: 20, 
+               ':hover': { backgroundColor: '#875989' } 
+            }} 
+            onClick={handleAddInventory}
+         >
+            <AddIcon />
+         </Fab>
       </>
    )
 }
