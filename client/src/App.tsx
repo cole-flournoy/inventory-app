@@ -5,11 +5,12 @@ import InventoryTable from './pages/InventoryTable'
 import ItemDetail from './pages/ItemDetail'
 import SignUp from './pages/SignUp'
 import { Toaster } from 'react-hot-toast'
+import { CookiesProvider } from 'react-cookie'
 
 function App() {
 
   return (
-    <>
+    <CookiesProvider>
       <Toaster />
       <Router>
         <Routes>        
@@ -19,7 +20,7 @@ function App() {
           <Route path="/itemDetail" element={<ItemDetail />} />
         </Routes>
       </Router>
-    </>
+    </CookiesProvider>
   )
 }
 

@@ -29,7 +29,7 @@ export default function SignUp() {
          return
       }
 
-      const response = await axios.post('http://localhost:8080/api/signup', signUpFormState)
+      const response = await axios.post('http://localhost:8080/api/signup', signUpFormState, { withCredentials: true })
 
       console.log(response)
       

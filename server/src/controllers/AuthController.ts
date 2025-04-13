@@ -41,3 +41,32 @@ export const Signup = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
+
+export const Login = async (req: Request, res: Response) => {
+  console.log('Login request received:', req.body);
+  
+  try {
+    const user = await User.findOne({ username: req.body.username });
+    if (!user) {
+      res.status(401).json({ message: "Invalid username or password" });
+      return;
+    }
+    
+    const isPasswordValid = await user.comparePassword(req.body.password);
+    if (!isPasswordValid) {
+      res.status(401).json({ message: "Invalid username or password" });
+      return;
+    }
+    
+    const token = createSecretToken(user._id as string);
+    res.cookie("token", token, {
+      httpOnly: false,
+    });
+
+    res.status(201).json({ success: true });
+    console.log('User logged in:', user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}

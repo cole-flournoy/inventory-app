@@ -24,11 +24,10 @@ export default function Login() {
          return
       }
 
-      const response = await axios.post('http://localhost:8080/api/login', loginFormState)
+      const response = await axios.post('http://localhost:8080/api/login', loginFormState, { withCredentials: true })
       
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
          toast.success('Login successful')
-         
          navigate('/inventory')
       } else if (response.status === 401) {
          toast.error('Invalid username or password')
@@ -37,10 +36,7 @@ export default function Login() {
       } else {
          toast.error('An error occurred. Please try again.')
       }
-
-
-
-      navigate('/inventory')
+   
    }
 
    return (

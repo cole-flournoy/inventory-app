@@ -1,9 +1,13 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Table, { Column } from "../components/Table"
 import Modal from '@mui/material/Modal'
 import Box from '@mui/material/Box'
 import TextField from "@mui/material/TextField"
 import Button from "@mui/material/Button"
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom"
+import axios from "axios"
+import { toast } from "react-hot-toast"
 
  export interface InventoryRow {
    id: number
@@ -15,6 +19,43 @@ import Button from "@mui/material/Button"
 export default function InventoryTable() {
    const [editingRow, setEditingRow] = useState<InventoryRow>() 
    const [editFormState, setEditFormState] = useState<InventoryRow>({} as InventoryRow)
+
+   const navigate = useNavigate()
+   const [cookies, removeCookie] = useCookies(['token'])
+   
+   const verifyCookie = async () => {
+      if (!cookies.token) {
+        navigate('/login')
+      }
+      
+      try {
+         const { data } = await axios.post(
+           'http://localhost:8080/api/verify',
+           {},
+           { withCredentials: true }
+         )
+         
+         const { user } = data
+         toast.success(`Hello ${user.name}! You are an ${user.role} user`, {
+            duration: 5000,
+         })
+      } catch {
+         toast.error('Session expired. Please login again.', {
+            duration: 5000,
+         })
+         removeCookie('token', '')
+         navigate('/login')
+      }
+   }
+
+    useEffect(() => {
+      verifyCookie()
+    }, [cookies, navigate, removeCookie])
+   
+   const handleLogout = () => {
+      removeCookie('token', '')
+      navigate('/login')
+   }
 
    const columns: Column[] = [
       { 
