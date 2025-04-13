@@ -75,3 +75,24 @@ export const updateInventoryItem = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const deleteInventoryItem = async (req: Request, res: Response) => {
+  const { itemSKU } = req.body;
+
+  console.log('Delete inventory item request received:', req.body);
+
+  try {
+    const deletedItem = await Inventory.findOneAndDelete({ SKU: itemSKU });
+
+    if (!deletedItem) {
+      res.status(404).json({ message: 'Item not found' });
+      return;
+    }
+
+    console.log('Deleted item:', deletedItem);
+    res.status(200).json({ message: 'Item deleted', item: deletedItem });
+  } catch (error) {
+    console.error('Error deleting inventory item:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

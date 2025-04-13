@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyJWT } from "../utils/auth";
-import { getInventory, createInventoryItem, updateInventoryItem } from "../controllers/InventoryController";
+import { getInventory, createInventoryItem, updateInventoryItem, deleteInventoryItem } from "../controllers/InventoryController";
 
 const router = Router();
 
@@ -10,6 +10,6 @@ router.route('/')
   .get(getInventory)
   .post(createInventoryItem)
   .put(updateInventoryItem)
-  .delete();
+  .delete(deleteInventoryItem)
 
 module.exports = router;

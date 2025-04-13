@@ -166,9 +166,33 @@ export default function InventoryTable() {
             toast.error('Error updating inventory item')
          }
       }
-      
       setEditingRow(undefined)
       setAddingInventory(false)
+   }
+
+   const handleDeleteInventory = async (row: InventoryRow) => {
+      if (!window.confirm('Are you sure you want to delete this inventory item?')) {
+         return
+      }
+      
+      try {
+         const response = await axios.delete(
+            'http://localhost:8080/api/inventory',
+            { 
+               data: { itemSKU: row.SKU },
+               withCredentials: true 
+            }
+         )
+
+         if (response.status === 200) {
+            toast.success('Inventory item deleted')
+            fetchInventoryData()
+         } else {
+            toast.error('Error deleting inventory item')
+         }
+      } catch (error) {
+         toast.error('Error deleting inventory item')
+      }
    }
 
    return (
@@ -178,7 +202,7 @@ export default function InventoryTable() {
             flexDirection: 'column',
             alignItems: 'center', 
          }}>
-            <Table columns={columns} rows={rows} title='Inventory Table' handleEditClick={handleEditInventory}/>
+            <Table columns={columns} rows={rows} title='Inventory Table' handleEditClick={handleEditInventory} handleRemoveClick={handleDeleteInventory}/>
          </div>
          <Modal
             open={!!editingRow || addingInventory}

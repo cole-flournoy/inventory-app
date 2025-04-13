@@ -58,12 +58,13 @@ const sortRows = (rows: Row[], sortOptions: SortOptions) => {
    return rows
 }
 
-export default function Table({ columns, rows, title, handleEditClick }: 
+export default function Table({ columns, rows, title, handleEditClick, handleRemoveClick }: 
    { 
       columns: Column[],
       rows: Row[], 
       title: string,
-      handleEditClick: (row: Row) => void 
+      handleEditClick: (row: Row) => void, 
+      handleRemoveClick: (row: Row) => void,
    }) {
    const [page, setPage] = useState(0)
    const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -231,7 +232,7 @@ export default function Table({ columns, rows, title, handleEditClick }:
                                  <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
                                     <EditIcon fontSize='small' />
                                  </IconButton>
-                                 <IconButton aria-label='delete' size='small'>
+                                 <IconButton aria-label='delete' size='small' onClick={() => handleRemoveClick(row)}>
                                     <DeleteForeverIcon fontSize='small' />
                                  </IconButton>
                               </span>
