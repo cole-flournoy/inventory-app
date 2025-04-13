@@ -15,7 +15,7 @@ const InventorySchema = new Schema<Inventory>({
     unique: true,
   },
   companyId: {
-    type: Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Company',
     required: true,
   },
@@ -35,4 +35,6 @@ const InventorySchema = new Schema<Inventory>({
   timestamps: true,
 });
 
-export const InventoryModel = model<Inventory>('Inventory', InventorySchema);
+const Inventory = model<Inventory>('Inventory', InventorySchema);
+
+export default Inventory;

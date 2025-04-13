@@ -12,7 +12,7 @@ export interface User extends Document {
 
 const UserSchema = new Schema<User>({
   companyId: {
-    type: Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Company',
     required: true,
   },
@@ -57,4 +57,6 @@ UserSchema.methods.comparePassword = async function (incomingPassword: string): 
   return await bcrypt.compare(incomingPassword, this.password);
 };
 
-export const UserModel = model<User>('User', UserSchema);
+const User = model<User>('User', UserSchema);
+
+export default User;
