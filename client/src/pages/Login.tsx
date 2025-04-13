@@ -8,7 +8,9 @@ import InputAdornment from "@mui/material/InputAdornment"
 import InputLabel from "@mui/material/InputLabel"
 import OutlinedInput from "@mui/material/OutlinedInput"
 import TextField from "@mui/material/TextField"
+import axios from "axios"
 import { useState } from "react";
+import toast from "react-hot-toast"
 import { useNavigate } from 'react-router-dom'
 
 export default function Login() {
@@ -16,8 +18,29 @@ export default function Login() {
    const [loginFormState, setLoginFormState] = useState({ username: '', password: '' })
    const navigate = useNavigate()
    
-   const handleSubmitLogin = () => {
-      console.log(loginFormState)
+   const handleSubmitLogin = async () => {
+      if (!loginFormState.username || !loginFormState.password) {
+         toast.error('All fields are required')
+         return
+      }
+
+      const response = await axios.post('http://localhost:8080/api/login', loginFormState)
+      
+      if (response.status === 200) {
+         toast.success('Login successful')
+         
+         navigate('/inventory')
+      } else if (response.status === 401) {
+         toast.error('Invalid username or password')
+      } else if (response.status === 500) {
+         toast.error('Internal server error. Please refresh the page and try again.')
+      } else {
+         toast.error('An error occurred. Please try again.')
+      }
+
+
+
+      navigate('/inventory')
    }
 
    return (

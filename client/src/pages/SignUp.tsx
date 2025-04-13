@@ -29,11 +29,13 @@ export default function SignUp() {
          return
       }
 
-      const response = await axios.post('http://localhost:8080/api/users', signUpFormState)
+      const response = await axios.post('http://localhost:8080/api/signup', signUpFormState)
+
+      console.log(response)
       
       if (response.status === 201) {
          toast.success('Sign up successful')
-         navigate('/')
+         navigate('/login')
       } else if (response.status === 500) {
          toast.error('Internal server error. Please refresh the page and try again.')
       } else {
