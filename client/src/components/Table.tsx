@@ -2,7 +2,7 @@
 import Paper from '@mui/material/Paper'
 import TableContainer from '@mui/material/TableContainer'
 import MuiTable from '@mui/material/Table'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import TableCell from '@mui/material/TableCell'
@@ -67,11 +67,16 @@ export default function Table({ columns, rows, title, handleEditClick }:
    }) {
    const [page, setPage] = useState(0)
    const [rowsPerPage, setRowsPerPage] = useState<number>(10)
-   const [hoveredRowID, setHoveredRowID] = useState<number | null>(null)
+   const [hoveredRowID, setHoveredRowID] = useState<string | null>(null)
    const [sortAnchorEl, setSortAnchorEl] = useState<null | HTMLElement>(null)
    const [sortOptions, setSortOptions] = useState<SortOptions>({sortColumn: columns[0].id as keyof Row, algorithm: 'merge', sortOrder: 'asc'})
-   const [sortedRows, setSortedRows] = useState<Row[]>(sortRows(rows, sortOptions))
+   const [sortedRows, setSortedRows] = useState<Row[]>([])
    const [searchInput, setSearchInput] = useState<string>('')
+
+   useEffect(() => {
+      const sorted = sortRows(rows, sortOptions)
+      setSortedRows(sorted)
+   }, [rows])
 
    const algorithmOptions = [
       {id: 'bubble', display: 'Bubble sort'}, 
@@ -201,33 +206,40 @@ export default function Table({ columns, rows, title, handleEditClick }:
                </TableRow>
             </TableHead>
             <TableBody>
-               {getDisplayRows()
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => {
-                  return (
-                     <TableRow hover tabIndex={-1} key={row.id} onMouseEnter={() => setHoveredRowID(row.id)} onMouseLeave={() => setHoveredRowID(null)}>
-                        {columns.map((column) => {
-                           return (
-                              <TableCell key={column.id} align={column.align}>
-                                 {row[column.id as keyof Row]}
-                              </TableCell>
-                           )
-                        })}
-                        <TableCell key='actions' align='center' sx={{ padding: '0px 16px' }}>
-                           <span style={{ 
-                              display: hoveredRowID === row.id ? 'block' : 'none'
-                           }}>
-                              <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
-                                 <EditIcon fontSize='small' />
-                              </IconButton>
-                              <IconButton aria-label='delete' size='small'>
-                                 <DeleteForeverIcon fontSize='small' />
-                              </IconButton>
-                           </span>
-                        </TableCell>
-                     </TableRow>
-                  )
-                  })}
+               {(rows.length === 0 || getDisplayRows().length === 0) ?
+                  <TableRow>
+                     <TableCell colSpan={columns.length + 1} align='center'>
+                        No inventory items to show
+                     </TableCell>
+                  </TableRow> :
+                  getDisplayRows()
+                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                     .map((row) => {
+                     return (
+                        <TableRow hover tabIndex={-1} key={row.SKU} onMouseEnter={() => setHoveredRowID(row.SKU)} onMouseLeave={() => setHoveredRowID(null)}>
+                           {columns.map((column) => {
+                              return (
+                                 <TableCell key={column.id} align={column.align}>
+                                    {row[column.id as keyof Row]}
+                                 </TableCell>
+                              )
+                           })}
+                           <TableCell key='actions' align='center' sx={{ padding: '0px 16px' }}>
+                              <span style={{ 
+                                 display: hoveredRowID === row.SKU ? 'block' : 'none'
+                              }}>
+                                 <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
+                                    <EditIcon fontSize='small' />
+                                 </IconButton>
+                                 <IconButton aria-label='delete' size='small'>
+                                    <DeleteForeverIcon fontSize='small' />
+                                 </IconButton>
+                              </span>
+                           </TableCell>
+                        </TableRow>
+                     )
+                  })
+               }
             </TableBody>
             </MuiTable>
          </TableContainer>
