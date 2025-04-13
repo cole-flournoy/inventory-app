@@ -147,9 +147,12 @@ export default function InventoryTable() {
          } 
       } else {
          try {
-            const response = await axios.patch(
-               `http://localhost:8080/api/inventory/${editingRow?.SKU}`,
-               modalFormState,
+            const response = await axios.put(
+               'http://localhost:8080/api/inventory',
+               {
+                  currentSKU: editingRow?.SKU,
+                  updatedItem: modalFormState,
+               },
                { withCredentials: true }
             )
    
