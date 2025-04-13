@@ -8,7 +8,9 @@ import InputAdornment from "@mui/material/InputAdornment"
 import InputLabel from "@mui/material/InputLabel"
 import OutlinedInput from "@mui/material/OutlinedInput"
 import TextField from "@mui/material/TextField"
+import axios from "axios"
 import { useState } from "react"
+import toast from "react-hot-toast"
 import { useNavigate } from 'react-router-dom'
 
 export default function SignUp() {
@@ -21,8 +23,22 @@ export default function SignUp() {
    })
    const navigate = useNavigate()
    
-   const handleSubmitSignUp = () => {
-      console.log(signUpFormState)
+   const handleSubmitSignUp = async () => {      
+      if (!signUpFormState.name || !signUpFormState.company || !signUpFormState.username || !signUpFormState.password) {
+         toast.error('All fields are required')
+         return
+      }
+
+      const response = await axios.post('http://localhost:8080/api/users', signUpFormState)
+      
+      if (response.status === 201) {
+         toast.success('Sign up successful')
+         navigate('/')
+      } else if (response.status === 500) {
+         toast.error('Internal server error. Please refresh the page and try again.')
+      } else {
+         toast.error('An error occurred. Please try again.')
+      }
    }
 
    return (
