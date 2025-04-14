@@ -202,7 +202,7 @@ export default function InventoryTable() {
             flexDirection: 'column',
             alignItems: 'center', 
          }}>
-            <Table columns={columns} rows={rows} title='Inventory Table' handleEditClick={handleEditInventory} handleRemoveClick={handleDeleteInventory}/>
+            <Table columns={columns} rows={rows} title='Inventory Table' handleEditClick={handleEditInventory} handleRemoveClick={loggedInUser?.role === 'ADMIN' ? handleDeleteInventory : undefined} />
          </div>
          <Modal
             open={!!editingRow || addingInventory}
@@ -274,7 +274,7 @@ export default function InventoryTable() {
                </span>
             </Box>   
          </Modal>
-         <Fab 
+         {loggedInUser?.role === 'ADMIN' && <Fab 
             sx={{ 
                backgroundColor: '#692f6b', 
                color: '#fff', 
@@ -286,7 +286,7 @@ export default function InventoryTable() {
             onClick={handleAddInventory}
          >
             <AddIcon />
-         </Fab>
+         </Fab>}
       </>
    )
 }

@@ -64,7 +64,7 @@ export default function Table({ columns, rows, title, handleEditClick, handleRem
       rows: Row[], 
       title: string,
       handleEditClick: (row: Row) => void, 
-      handleRemoveClick: (row: Row) => void,
+      handleRemoveClick?: (row: Row) => void,
    }) {
    const [page, setPage] = useState(0)
    const [rowsPerPage, setRowsPerPage] = useState<number>(10)
@@ -232,9 +232,9 @@ export default function Table({ columns, rows, title, handleEditClick, handleRem
                                  <IconButton aria-label='edit' size='small' onClick={() => handleEditClick(row)}>
                                     <EditIcon fontSize='small' />
                                  </IconButton>
-                                 <IconButton aria-label='delete' size='small' onClick={() => handleRemoveClick(row)}>
+                                 {handleRemoveClick && <IconButton aria-label='delete' size='small' onClick={() => handleRemoveClick(row)}>
                                     <DeleteForeverIcon fontSize='small' />
-                                 </IconButton>
+                                 </IconButton>}
                               </span>
                            </TableCell>
                         </TableRow>
