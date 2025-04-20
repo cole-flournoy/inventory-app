@@ -137,7 +137,7 @@ export default function Table({ columns, rows, title, handleEditClick, handleRem
          </div>
       </Paper>
       
-      <Popper open={sortPopperOpen} anchorEl={sortAnchorEl} placement='bottom' style={{ zIndex: 100 }}>
+      <Popper open={sortPopperOpen} anchorEl={sortAnchorEl} placement='bottom-end' style={{ zIndex: 100 }}>
          <Paper sx={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '10px', width: '200px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', alignItems: 'center' }}>
                <FormControl fullWidth sx={{ }}>
@@ -179,7 +179,8 @@ export default function Table({ columns, rows, title, handleEditClick, handleRem
                   <ToggleButton value="desc">Desc</ToggleButton>
                </ToggleButtonGroup>
                <Button 
-                  variant='contained' 
+                  variant='contained'
+                  sx={{ backgroundColor: '#692f6b' }} 
                   onClick={() => {
                      setSortedRows((prevRows) => sortRows(prevRows, sortOptions))
                      setSortAnchorEl(null)
